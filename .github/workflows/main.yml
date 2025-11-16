@@ -1,0 +1,32 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.13.0' # Specify a Flutter version
+
+    - name: Install dependencies
+      run: flutter pub get
+      working-directory: ./car_dealership_app
+
+    - name: Analyze project source
+      run: flutter analyze
+      working-directory: ./car_dealership_app
+
+    # At the moment there are no tests, this step can be enabled later.
+    # - name: Run tests
+    #   run: flutter test
+    #   working-directory: ./car_dealership_app

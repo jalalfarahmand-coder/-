@@ -1,4 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+
 
 class NotificationService {
   static final NotificationService _notificationService = NotificationService._internal();
@@ -17,13 +20,12 @@ class NotificationService {
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    // Currently, flutter_local_notifications does not fully support Windows notifications
-    // in the same way as Android/iOS. This setup is primarily for mobile.
-    // For a desktop solution, a different or supplementary package might be needed.
-
     const InitializationSettings initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid,
     );
+
+    // Initialize timezone database
+    tz.initializeTimeZones();
 
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
@@ -34,13 +36,11 @@ class NotificationService {
     required String body,
     required DateTime scheduledDate,
   }) async {
-    // Note: TimeZone needs to be configured for accurate scheduling.
-    // This is a simplified example.
-    await flutterLocalNotificationsPlugin.schedule(
+    await flutterLocalNotificationsPlugin.zonedSchedule(
       id,
       title,
       body,
-      scheduledDate,
+      tz.TZDateTime.from(scheduledDate, tz.local),
       const NotificationDetails(
         android: AndroidNotificationDetails(
           'main_channel',
@@ -51,6 +51,9 @@ class NotificationService {
           icon: '@mipmap/ic_launcher',
         ),
       ),
+      androidAllowWhileIdle: true,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 
